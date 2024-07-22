@@ -45,7 +45,6 @@ def get_new_tag(latest_tag: str | None, release_tag: ReleaseTag) -> str:
     (major, minor, patch), _ = parse_version(latest_tag.removeprefix("v"))
     _next_release = f"v{major}.{minor + 1}.0"
     if release_tag != "stable":
-        print("getting latest release tag")
         _latest_release_tag = get_latest_release_tag(release_tag)
         logger.info(f"Latest {release_tag} tag: {_latest_release_tag}")
         _release_number = int(_latest_release_tag.split(".")[-1]) + 1 if _latest_release_tag is not None else 0
