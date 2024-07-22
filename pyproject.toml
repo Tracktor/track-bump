@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "track-bump"
-version = "0.2.2"
+version = "0.2.3"
 description = ""
 authors = ["Julien Brayere <julien.brayere@tracktor.fr>"]
 readme = "README.md"
@@ -36,7 +36,7 @@ pythonPlatform = "Linux"
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "0.2.2"
+version = "0.2.3"
 tag_format = "$version"
 version_files = [
     "pyproject.toml:version"
