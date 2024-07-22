@@ -5,6 +5,7 @@ import subprocess
 from track_bump.env import CI_USER, CI_USER_EMAIL
 import contextlib
 from .logs import logger
+from .env import MAIN_BRANCH
 
 __all__ = (
     "exec_cmd",
@@ -61,6 +62,7 @@ def git_setup(sign_commits: bool = False):
         raise ValueError("CI_USER must be set")
     if CI_USER_EMAIL is None:
         raise ValueError("CI_USER_EMAIL must be set")
+    exec_cmd(f'git config --global init.defaultBranch "{MAIN_BRANCH}"')
     exec_cmd(["git config --local user.email", CI_USER_EMAIL])
     exec_cmd(["git config --local user.name", CI_USER])
     if sign_commits:

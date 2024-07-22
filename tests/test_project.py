@@ -4,7 +4,7 @@ import tomllib
 import pytest
 import shutil
 
-from .conftest import STATIC_DIR, MAIN_BRANCH
+from .conftest import STATIC_DIR
 
 
 @pytest.fixture(scope="function")
@@ -15,11 +15,11 @@ def project_path(tmp_path: Path):
 @pytest.fixture(scope="function")
 def setup_project(project_path: Path):
     shutil.copytree(STATIC_DIR / "project", project_path)
-    from track_bump.utils import exec_cmd, set_cd
+    from track_bump.utils import git_setup, set_cd, exec_cmd
 
     with set_cd(project_path):
-        exec_cmd(f'git config --global init.defaultBranch "{MAIN_BRANCH}"')
         exec_cmd("git init")
+        git_setup(sign_commits=False)
 
 
 def get_tags(project_path: Path):
