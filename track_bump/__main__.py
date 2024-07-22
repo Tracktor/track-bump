@@ -20,8 +20,8 @@ cli.set_options_processor(on_process)
 
 @cli.command(cmd="bump", help="Bump project version")
 def bump(
-        project_path: Path = Option(..., '-p', '--project', help="Project path"),
-        sign_commits: bool = Option(False, '--sign', help="Sign commits"),
+    project_path: Path = Option(..., "-p", "--project", help="Project path"),
+    sign_commits: bool = Option(False, "--sign", help="Sign commits"),
 ):
     bump_project(project_path, sign_commits)
 

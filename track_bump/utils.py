@@ -6,16 +6,17 @@ from track_bump.env import CI_USER, CI_USER_EMAIL
 import contextlib
 from .logs import logger
 
-__all__ = ("exec_cmd",
-           "get_last_tag",
-           "git_tag",
-           "git_setup",
-           "set_cd",
-           "get_current_branch",
-           "git_commit",
-           "parse_version",
-           "get_tags"
-           )
+__all__ = (
+    "exec_cmd",
+    "get_last_tag",
+    "git_tag",
+    "git_setup",
+    "set_cd",
+    "get_current_branch",
+    "git_commit",
+    "parse_version",
+    "get_tags",
+)
 
 
 def exec_cmd(cmd: str | list[str], *, encoding: str = "utf-8", env: dict | None = None) -> str:
@@ -41,7 +42,7 @@ def set_cd(path: pathlib.Path):
 
 
 def get_tags():
-    tags = exec_cmd(f'git tag --sort=-version:refname').split('\n')
+    tags = exec_cmd("git tag --sort=-version:refname").split("\n")
     return [x.strip() for x in tags if x.strip()]
 
 
@@ -52,7 +53,7 @@ def get_last_tag(pattern: str) -> str | None:
 
 
 def git_tag(version: str):
-    exec_cmd(f'git tag {version}')
+    exec_cmd(f"git tag {version}")
 
 
 def git_setup(sign_commits: bool = False):
@@ -60,18 +61,18 @@ def git_setup(sign_commits: bool = False):
         raise ValueError("CI_USER must be set")
     if CI_USER_EMAIL is None:
         raise ValueError("CI_USER_EMAIL must be set")
-    exec_cmd(['git config --local user.email', CI_USER_EMAIL])
-    exec_cmd(['git config --local user.name', CI_USER])
+    exec_cmd(["git config --local user.email", CI_USER_EMAIL])
+    exec_cmd(["git config --local user.name", CI_USER])
     if sign_commits:
-        exec_cmd('git config --local commit.gpgSign true')
+        exec_cmd("git config --local commit.gpgSign true")
 
 
 def get_current_branch() -> str:
-    return exec_cmd('git branch --show-current').strip()
+    return exec_cmd("git branch --show-current").strip()
 
 
 def git_commit(message: str):
-    exec_cmd('git add .')
+    exec_cmd("git add .")
     exec_cmd(f'git commit -am "{message}"')
 
 
@@ -80,11 +81,11 @@ type ReleaseVersion = tuple[str, int]
 
 
 def parse_version(version: str) -> tuple[MajorMinorPatch, ReleaseVersion | None]:
-    _version, *_release = version.split('-')
-    major, minor, patch = [int(x) for x in _version.split('.')]
+    _version, *_release = version.split("-")
+    major, minor, patch = [int(x) for x in _version.split(".")]
 
     if _release:
-        _release_name, _release_number_str = _release[0].split('.')
+        _release_name, _release_number_str = _release[0].split(".")
         release = (_release_name, int(_release_number_str))
     else:
         release = None
