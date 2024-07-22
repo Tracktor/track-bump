@@ -15,4 +15,4 @@ STATIC_DIR = Path(__file__).parent / "static"
 def setup_logging():
     from track_bump.logs import init_logging
 
-    init_logging(logging.INFO)
+    init_logging(logging.WARNING)

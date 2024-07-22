@@ -26,8 +26,6 @@ def exec_cmd(cmd: str | list[str], *, encoding: str = "utf-8", env: dict | None 
     stdout, stderr = subprocess.Popen(
         cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable=default_shell, env=env
     ).communicate()
-    logger.debug(f"stdout: {stdout}")
-    logger.debug(f"stderr: {stderr}")
     if stderr:
         raise Exception(stderr.decode(encoding))
     return stdout.decode(encoding)
@@ -55,7 +53,9 @@ def get_last_tag(pattern: str) -> str | None:
 
 
 def git_tag(version: str):
-    exec_cmd(f"git tag {version}")
+    _output = exec_cmd(f"git tag {version}")
+    if _output:
+        logger.debug(f"tag output: {_output}")
 
 
 def git_setup(sign_commits: bool = False):
