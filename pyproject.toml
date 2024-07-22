@@ -1,0 +1,69 @@
+[tool.poetry]
+name = "track-bump"
+version = "0.1.0"
+description = ""
+authors = ["Julien Brayere <julien.brayere@tracktor.fr>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+piou = "^0.14.2"
+
+[tool.poetry.group.dev.dependencies]
+pytest-cov = "^5.0.0"
+pytest = "^8.2.2"
+pyright = "^1.1.372"
+ruff = "^0.5.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+addopts = "--cov=track_bump -s -q -x --no-cov-on-fail"
+testpaths = [
+    "tests"
+]
+python_files = "*.py"
+
+
+[tool.pyright]
+include = ["track_bump", "tests"]
+exclude = []
+
+pythonVersion = "3.12"
+pythonPlatform = "Linux"
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.49.0"
+tag_format = "$version"
+version_files = [
+    "pyproject.toml:version"
+]
+bump_message = "release $current_version → $new_version [skip ci]"
+
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+# Waiting for fix: https://github.com/charliermarsh/ruff/issues/282
+#ignore = ["E999"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = [
+    # imported but unused
+    "F401",
+    # unable to detect undefined names
+    "F403",
+    #
+    "F405"
+]
+
+[tool.ruff.lint.flake8-quotes]
+docstring-quotes = "double"
+inline-quotes = "single"
+
+[tool.ruff.lint.flake8-tidy-imports]
+# Disallow all relative imports.
+ban-relative-imports = "all"
