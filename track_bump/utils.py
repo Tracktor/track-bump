@@ -26,6 +26,8 @@ def exec_cmd(cmd: str | list[str], *, encoding: str = "utf-8", env: dict | None 
     stdout, stderr = subprocess.Popen(
         cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable=default_shell, env=env
     ).communicate()
+    logger.debug(f"stdout: {stdout}")
+    logger.debug(f"stderr: {stderr}")
     if stderr:
         raise Exception(stderr.decode(encoding))
     return stdout.decode(encoding)
