@@ -4,7 +4,7 @@ import tomllib
 import pytest
 import shutil
 
-from .conftest import STATIC_DIR
+from .conftest import STATIC_DIR, MAIN_BRANCH
 
 
 @pytest.fixture(scope="function")
@@ -18,6 +18,7 @@ def setup_project(project_path: Path):
     from track_bump.utils import git_setup, set_cd, exec_cmd
 
     with set_cd(project_path):
+        exec_cmd(f'git config --global init.defaultBranch "{MAIN_BRANCH}"')
         exec_cmd("git init")
         git_setup(sign_commits=False)
 
