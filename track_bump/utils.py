@@ -62,10 +62,10 @@ def git_setup(sign_commits: bool = False):
     if CI_USER_EMAIL is None:
         raise ValueError("CI_USER_EMAIL must be set")
 
-    exec_cmd(["git config --local user.email", CI_USER_EMAIL])
-    exec_cmd(["git config --local user.name", CI_USER])
+    exec_cmd(f'git config user.email "{CI_USER_EMAIL}"')
+    exec_cmd(f'git config user.name "{CI_USER}"')
     if sign_commits:
-        exec_cmd("git config --local commit.gpgSign true")
+        exec_cmd("git config commit.gpgSign true")
 
 
 def get_current_branch() -> str:
