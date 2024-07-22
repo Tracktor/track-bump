@@ -1,13 +1,13 @@
 import pytest
 from contextlib import nullcontext
-from .conftest import MAIN_BRANCH
+from .conftest import DEFAULT_BRANCH
 
 
 @pytest.mark.parametrize(
     "branch, expected",
     [
         pytest.param("develop", nullcontext("beta"), id="develop"),
-        pytest.param(MAIN_BRANCH, nullcontext("stable"), id="main branch"),
+        pytest.param(DEFAULT_BRANCH, nullcontext("stable"), id="main branch"),
         pytest.param("release/foo", nullcontext("rc"), id="release"),
         pytest.param("foo", pytest.raises(ValueError, match="Branch 'foo' is not supported"), id="invalid branch"),
     ],
@@ -32,7 +32,7 @@ def test_get_branch_release_tag(branch, expected):
         pytest.param(
             {"latest_tag": None, "release_tag": "stable"},
             NotImplementedError("Should not trigger"),
-            pytest.raises(ValueError, match=r"No main tags found. Please create a release tag first \(like v0.1.0\)"),
+            pytest.raises(ValueError, match=r"No tags found. Please create a release tag first \(like v0.1.0\)"),
             id="stable no previous",
         ),
         pytest.param(

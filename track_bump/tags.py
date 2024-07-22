@@ -1,11 +1,11 @@
 from .utils import get_last_tag, parse_version
 from .logs import logger
-from .env import MAIN_BRANCH
+from .env import DEFAULT_BRANCH
 from typing import Literal
 import re
 
 __all__ = (
-    "get_latest_main_tag",
+    "get_latest_default_tag",
     "get_latest_release_tag",
     "get_branch_release_tag",
     "get_new_tag",
@@ -13,13 +13,17 @@ __all__ = (
     "BranchName",
 )
 
-type ReleaseTag = Literal["beta", "rc", "stable"]
+ReleaseTag = Literal["beta", "rc", "stable"]
 type BranchName = str
 
-_RELEASE_TAGS: dict[BranchName, ReleaseTag] = {r"^develop$": "beta", r"release/.*": "rc", rf"^{MAIN_BRANCH}": "stable"}
+_RELEASE_TAGS: dict[BranchName, ReleaseTag] = {
+    r"^develop$": "beta",
+    r"^release/.*": "rc",
+    rf"^{DEFAULT_BRANCH}$": "stable",
+}
 
 
-def get_latest_main_tag():
+def get_latest_default_tag():
     return get_last_tag(r"^v\d+\.\d+\.\d+$")
 
 
@@ -39,7 +43,7 @@ def get_new_tag(latest_tag: str | None, release_tag: ReleaseTag) -> str:
     Return the new tag based on the latest release tag and current branch
     """
     if not latest_tag:
-        raise ValueError("No main tags found. Please create a release tag first (like v0.1.0)")
+        raise ValueError("No tags found. Please create a release tag first (like v0.1.0)")
     logger.info(f"Latest tag: {latest_tag}")
 
     (major, minor, patch), _ = parse_version(latest_tag.removeprefix("v"))

@@ -3,8 +3,8 @@ from pathlib import Path
 import logging
 import pytest
 
-MAIN_BRANCH = "master"
-os.environ["MAIN_BRANCH"] = MAIN_BRANCH
+DEFAULT_BRANCH = "master"
+os.environ["DEFAULT_BRANCH"] = DEFAULT_BRANCH
 os.environ["CI_USER"] = "foo"
 os.environ["CI_USER_EMAIL"] = "foo@bar.com"
 

@@ -2,7 +2,7 @@ from pathlib import Path
 from .logs import logger
 
 from track_bump.utils import set_cd, get_current_branch, git_setup, git_commit, git_tag, parse_version
-from track_bump.tags import get_latest_main_tag, get_branch_release_tag, get_new_tag
+from track_bump.tags import get_latest_default_tag, get_branch_release_tag, get_new_tag
 from track_bump.update_files import parse_config_file, replace_in_files
 
 CONFIG_FILES = [".cz.toml", "pyproject.toml"]
@@ -20,7 +20,7 @@ def bump_project(project_path: Path, sign_commits: bool = False, branch: str | N
 
     git_setup(sign_commits=sign_commits)
     with set_cd(project_path):
-        _latest_tag = get_latest_main_tag()
+        _latest_tag = get_latest_default_tag()
         logger.info(f"Latest tag: {_latest_tag}")
         _branch = branch or get_current_branch()
         _tag = get_branch_release_tag(_branch)
