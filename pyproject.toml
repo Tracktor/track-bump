@@ -70,4 +70,4 @@ ban-relative-imports = "all"
 
 
 [tool.poetry.scripts]
-track-bump = 'track_bump.__main__:run'
+cli = 'track_bump.__main__:run'
