@@ -3,6 +3,8 @@ import tomllib
 import re
 from typing import TypedDict
 
+from .logs import logger
+
 __all__ = ("parse_config_file", "replace_in_file", "ParseConfig", "replace_in_files")
 
 
@@ -21,6 +23,7 @@ class ParseConfig(TypedDict):
 def parse_config_file(config_path: Path) -> ParseConfig:
     if not config_path.exists():
         raise FileNotFoundError(f"{config_path} not found")
+    logger.debug(f"Parsing {config_path}")
     data = tomllib.loads(config_path.read_text())
 
     _config = data.get("tool", {}).get("track-bump")
@@ -48,4 +51,5 @@ def replace_in_files(config_path: Path, files: list[str], version: str):
         _file_path = Path(config_path.parent / _path)
         if not _file_path.exists():
             raise FileNotFoundError(f"{_file_path} not found")
+        logger.debug(f"Replacing in {_file_path}")
         replace_in_file(_file_path, version=version, tag=_tag)

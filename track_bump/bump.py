@@ -40,3 +40,4 @@ def bump_project(project_path: Path, sign_commits: bool = False, branch: str | N
     with set_cd(project_path):
         git_commit(_bump_message)
         git_tag(_new_tag)
+    logger.info("Done")
