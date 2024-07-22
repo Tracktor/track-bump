@@ -58,7 +58,7 @@ jobs:
           command: pip install commitizen==3.11.0
       - add_ssh_keys:
           fingerprints:
-            - "e0:d6:34:bd:b0:87:84:60:18:7e:e0:c8:e6:1d:be:d2"
+            - "SHA256:x6erWUaEk8A0K+3De4wj/2z2SmNBbjzEWoVbgzVwyOI"
       - run:
           name: Adding github.com to known hosts
           command: |
