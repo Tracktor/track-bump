@@ -58,9 +58,12 @@ def get_new_tag(latest_tag: str | None, release_tag: ReleaseTag, last_commit_mes
         _tag = f"{_next_release}-{release_tag}.{_release_number}"
     else:
         _last_commit_message = last_commit_message or get_last_commit_message()
+        logger.info(f"Last commit message: {_last_commit_message}")
         if _last_commit_message is None or _BUMP_MINOR_REG.match(_last_commit_message):
+            logger.debug("Bumping minor")
             _tag = _next_release
         else:
+            logger.debug("Bumping patch")
             _tag = f"v{major}.{minor}.{patch + 1}"
 
     return _tag
