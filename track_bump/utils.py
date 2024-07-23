@@ -16,6 +16,7 @@ __all__ = (
     "git_commit",
     "parse_version",
     "get_tags",
+    "get_last_commit_message",
 )
 
 
@@ -77,6 +78,11 @@ def get_current_branch() -> str:
 def git_commit(message: str):
     exec_cmd("git add .")
     exec_cmd(f'git commit -am "{message}"')
+
+
+def get_last_commit_message() -> str | None:
+    _latest_commit = exec_cmd("git log -1 --pretty=%B").strip()
+    return _latest_commit if _latest_commit else None
 
 
 type MajorMinorPatch = tuple[int, int, int]

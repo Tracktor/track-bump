@@ -1,4 +1,4 @@
-from .utils import get_last_tag, parse_version
+from .utils import get_last_tag, parse_version, get_last_commit_message
 from .logs import logger
 from .env import DEFAULT_BRANCH
 from typing import Literal
@@ -38,7 +38,10 @@ def get_branch_release_tag(branch: BranchName) -> ReleaseTag:
     raise ValueError(f"Branch {branch!r} is not supported")
 
 
-def get_new_tag(latest_tag: str | None, release_tag: ReleaseTag) -> str:
+_BUMP_MINOR_REG = re.compile(r"release:.*")
+
+
+def get_new_tag(latest_tag: str | None, release_tag: ReleaseTag, last_commit_message: str | None = None) -> str:
     """
     Return the new tag based on the latest release tag and current branch
     """
@@ -54,6 +57,10 @@ def get_new_tag(latest_tag: str | None, release_tag: ReleaseTag) -> str:
         _release_number = int(_latest_release_tag.split(".")[-1]) + 1 if _latest_release_tag is not None else 0
         _tag = f"{_next_release}-{release_tag}.{_release_number}"
     else:
-        _tag = _next_release
+        _last_commit_message = last_commit_message or get_last_commit_message()
+        if _last_commit_message is None or _BUMP_MINOR_REG.match(_last_commit_message):
+            _tag = _next_release
+        else:
+            _tag = f"v{major}.{minor}.{patch + 1}"
 
     return _tag

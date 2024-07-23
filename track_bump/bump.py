@@ -8,7 +8,9 @@ from track_bump.update_files import parse_config_file, replace_in_files
 CONFIG_FILES = [".cz.toml", "pyproject.toml"]
 
 
-def bump_project(project_path: Path, sign_commits: bool = False, branch: str | None = None):
+def bump_project(
+    project_path: Path, sign_commits: bool = False, branch: str | None = None, last_commit_message: str | None = None
+):
     for file in CONFIG_FILES:
         config_path = Path(project_path / file)
         if config_path.exists():
@@ -29,7 +31,7 @@ def bump_project(project_path: Path, sign_commits: bool = False, branch: str | N
         if _latest_tag is None:
             (major, minor, path), release = parse_version(config["version"])
             _latest_tag = f"v{major}.{max(minor - 1, 1)}.{path}"
-        _new_tag = get_new_tag(latest_tag=_latest_tag, release_tag=_tag)
+        _new_tag = get_new_tag(latest_tag=_latest_tag, release_tag=_tag, last_commit_message=last_commit_message)
 
     current_version = config["version"]
     new_version = _new_tag.removeprefix("v")

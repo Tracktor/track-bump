@@ -41,10 +41,23 @@ def test_get_branch_release_tag(branch, expected):
             nullcontext("v0.2.0"),
             id="stable",
         ),
+        pytest.param(
+            {"latest_tag": "v0.1.0", "release_tag": "stable", "last_commit_message": "release: v0.1.0"},
+            NotImplementedError("Should not trigger"),
+            nullcontext("v0.2.0"),
+            id="stable with commit message",
+        ),
+        pytest.param(
+            {"latest_tag": "v0.1.0", "release_tag": "stable", "last_commit_message": "fix: v0.1.0"},
+            NotImplementedError("Should not trigger"),
+            nullcontext("v0.1.1"),
+            id="stable patch with commit message",
+        ),
     ],
 )
 def test_get_new_tag(params, latest_release_tag, expected, monkeypatch):
     monkeypatch.setattr("track_bump.tags.get_latest_release_tag", lambda x: latest_release_tag)
+    monkeypatch.setattr("track_bump.tags.get_last_commit_message", lambda: None)
     from track_bump.tags import get_new_tag
 
     with expected as e:

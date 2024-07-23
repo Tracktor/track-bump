@@ -38,7 +38,8 @@ def get_versions(project_path: Path):
     return {"default": default_version, "sub_1": _sub_1, "sub_2": _sub_2}
 
 
-def test_bump(setup_project, project_path):
+def test_bump(setup_project, project_path, monkeypatch):
+    monkeypatch.setattr("track_bump.tags.get_last_commit_message", lambda: None)
     from track_bump.bump import bump_project
 
     assert get_versions(project_path) == {
@@ -58,11 +59,16 @@ def test_bump(setup_project, project_path):
     assert set(get_tags(project_path)) == set(tags), "Tags should be incremented"
     assert get_versions(project_path) == {"default": "0.2.0-beta.1", "sub_1": "0.2.0-beta.1", "sub_2": "0.2.0-beta.1"}
 
-    # Changing to main
+    # Changing to main, making a fix
+
+    bump_project(project_path, last_commit_message="fix: a fix")
+    tags.append("v0.1.1")
+    assert set(get_tags(project_path)) == set(tags)
+    assert get_versions(project_path) == {"default": "0.1.1", "sub_1": "0.1.1", "sub_2": "0.1.1"}
+
+    # Creating a release
 
     bump_project(project_path)
     tags.append("v0.2.0")
     assert set(get_tags(project_path)) == set(tags)
     assert get_versions(project_path) == {"default": "0.2.0", "sub_1": "0.2.0", "sub_2": "0.2.0"}
-
-    # Changing to
