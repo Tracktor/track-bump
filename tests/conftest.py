@@ -13,6 +13,7 @@ STATIC_DIR = Path(__file__).parent / "static"
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_logging():
-    from track_bump.logs import init_logging
+    from track_bump.logs import init_logging, console
 
     init_logging(logging.WARNING)
+    console.quiet = True

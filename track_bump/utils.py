@@ -17,6 +17,7 @@ __all__ = (
     "parse_version",
     "get_tags",
     "get_last_commit_message",
+    "fetch_tags",
 )
 
 
@@ -40,6 +41,11 @@ def set_cd(path: pathlib.Path):
         yield
     finally:
         os.chdir(prev_cwd)
+
+
+def fetch_tags(force: bool = False):
+    logger.debug(f"Fetching tags (force: {force})")
+    exec_cmd("git fetch --tags" + (" --force" if force else ""))
 
 
 def get_tags():

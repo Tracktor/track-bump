@@ -1,5 +1,5 @@
 from .utils import get_last_tag, parse_version, get_last_commit_message
-from .logs import logger
+from .logs import logger, COMMIT_START, COMMIT_END
 from .env import DEFAULT_BRANCH
 from typing import Literal
 import re
@@ -47,7 +47,6 @@ def get_new_tag(latest_tag: str | None, release_tag: ReleaseTag, last_commit_mes
     """
     if not latest_tag:
         raise ValueError("No tags found. Please create a release tag first (like v0.1.0)")
-    logger.info(f"Latest tag: {latest_tag}")
 
     (major, minor, patch), _ = parse_version(latest_tag.removeprefix("v"))
     _next_release = f"v{major}.{minor + 1}.0"
@@ -59,7 +58,7 @@ def get_new_tag(latest_tag: str | None, release_tag: ReleaseTag, last_commit_mes
     else:
         _last_commit_message = last_commit_message or get_last_commit_message()
         logger.info(
-            f"Last commit message: {_last_commit_message}"
+            f"Last commit message: {COMMIT_START}{_last_commit_message}{COMMIT_END}"
             if _last_commit_message is not None
             else "No commit message found"
         )
