@@ -47,7 +47,7 @@ def bump_project(
         _branch = branch or get_current_branch()
         _release_tag = get_branch_release_tag(_branch)
         logger.info(
-            f"Branch {BRANCH_START}{_branch}{BRANCH_END} " f"(tag: {RELEASE_TAG_START}{_release_tag}{RELEASE_TAG_END})"
+            f"Branch {BRANCH_START}{_branch}{BRANCH_END} (tag: {RELEASE_TAG_START}{_release_tag}{RELEASE_TAG_END})"
         )
 
         if _latest_tag is None:
