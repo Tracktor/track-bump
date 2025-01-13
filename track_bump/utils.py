@@ -105,7 +105,14 @@ type ReleaseVersion = tuple[str, int]
 
 
 def parse_version(version: str) -> tuple[MajorMinorPatch, ReleaseVersion | None]:
-    _version, *_release = version.split("-")
+    """
+    Parse the version string and return a tuple with the major, minor, patch and the release version if any
+    For example:
+    - v0.1.0-beta.1 -> ((0, 1, 0), ('beta', 1))
+    - v0.1.0 -> ((0, 1, 0), None)
+    """
+
+    _version, *_release = version.removeprefix("v").split("-")
     major, minor, patch = [int(x) for x in _version.split(".")]
 
     if _release:

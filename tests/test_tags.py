@@ -24,27 +24,27 @@ def test_get_branch_release_tag(branch, expected):
 @pytest.mark.parametrize(
     "params, latest_release_tag, expected",
     [
-        pytest.param({"latest_tag": "v0.1.0", "release_tag": "beta"}, None, nullcontext("v0.2.0-beta.0"), id="beta"),
+        pytest.param({"stable_tag": "v0.1.0", "release_tag": "beta"}, None, nullcontext("v0.2.0-beta.0"), id="beta"),
         pytest.param(
-            {"latest_tag": "v0.1.0", "release_tag": "beta"},
+            {"stable_tag": "v0.1.0", "release_tag": "beta"},
             "v0.2.0-beta.1",
             nullcontext("v0.2.0-beta.2"),
             id="beta existing release tag",
         ),
         pytest.param(
-            {"latest_tag": None, "release_tag": "stable"},
+            {"stable_tag": None, "release_tag": "stable"},
             NotImplementedError("Should not trigger"),
             pytest.raises(ValueError, match=r"No tags found. Please create a release tag first \(like v0.1.0\)"),
             id="stable no previous",
         ),
         pytest.param(
-            {"latest_tag": "v0.1.0", "release_tag": "stable"},
+            {"stable_tag": "v0.1.0", "release_tag": "stable"},
             NotImplementedError("Should not trigger"),
             nullcontext("v0.2.0"),
             id="stable",
         ),
         pytest.param(
-            {"latest_tag": "v0.1.0", "release_tag": "stable", "last_commit_message": "release: v0.1.0"},
+            {"stable_tag": "v0.1.0", "release_tag": "stable", "last_commit_message": "release: v0.1.0"},
             NotImplementedError("Should not trigger"),
             nullcontext("v0.2.0"),
             id="stable with commit message",
