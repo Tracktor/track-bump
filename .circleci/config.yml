@@ -2,7 +2,7 @@ version: 2.1
 
 orbs:
   gh: circleci/github-cli@1.0
-  sre: tracktor/ci-tools@0.7.1
+  sre: tracktor/ci-tools@0.11.2
 
 references:
   pypi_context: &pypi_context
@@ -29,11 +29,11 @@ references:
 executors:
   test-3-12:
     docker:
-      - image: cimg/python:3.12.1-node
+      - image: tracktor/python-ci:3.12.8-node
 
   build:
     docker:
-      - image: cimg/python:3.12
+      - image: tracktor/python-ci:3.12.8-node
 
 jobs:
 
@@ -42,37 +42,26 @@ jobs:
     steps:
       - checkout
       - sre/run-python-tests:
-          extras: '--all-extras'
+          extras: '--quiet'
           formatter: 'ruff'
-      - sre/run-python-tests:
-          extras: '--all-extras'
-          formatter: 'ruff'
+          tool: 'uv'
 
   bump-version:
     executor: build
     steps:
       - gh/setup
       - checkout
-      - run:
-          name: Install bump deps
-          command: pip install commitizen==3.11.0
-      - add_ssh_keys:
-          fingerprints:
-            - "SHA256:x6erWUaEk8A0K+3De4wj/2z2SmNBbjzEWoVbgzVwyOI"
-      - run:
-          name: Adding github.com to known hosts
-          command: |
-            mkdir -p ~/.ssh
-            ssh-keyscan github.com >> ~/.ssh/known_hosts
       - sre/bump-version:
           lang: "python"
-          use_poetry: true
+          tool: "uv"
           branch: "master"
+          sign: false
+          build: true
       - store_artifacts:
           path: dist
       - save_cache:
           name: Saving wheel
-          key: project-{{ checksum "pyproject.toml" }}
+          key: trackbump-{{ checksum "pyproject.toml" }}
           paths:
             - dist/
 
@@ -83,10 +72,10 @@ jobs:
       - restore_cache:
           name: Restore wheel
           keys:
-            - project-{{ checksum "pyproject.toml" }}
+            - trackbump-{{ checksum "pyproject.toml" }}
       - run:
           name: Publishing
-          command: poetry publish -u __token__ -p $PYPI_TOKEN
+          command: uv publish -u $PYPI_USER -p $PYPI_PASSWORD
 
 
 workflows:

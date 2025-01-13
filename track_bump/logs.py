@@ -1,7 +1,8 @@
 import logging
-from rich.console import Console
-from dataclasses import dataclass
 import re
+from dataclasses import dataclass, field
+
+from rich.console import Console
 
 __all__ = (
     "logger",
@@ -14,10 +15,11 @@ __all__ = (
     "COMMIT_END",
     "DRY_RUN_START",
     "DRY_RUN_END",
+    "RELEASE_TAG_START",
+    "RELEASE_TAG_END",
 )
 
 _logger = logging.getLogger("track-bump")
-console = Console()
 
 
 def init_logging(level: int = logging.WARNING):
@@ -29,32 +31,73 @@ def init_logging(level: int = logging.WARNING):
 
 
 @dataclass
-class Logger:
-    level: int = logging.INFO
-    log_enabled: bool = False
+class RichLogger:
+    logger: logging.Logger
+    console: Console = field(default_factory=Console)
 
-    def debug(self, message: str):
-        _logger.debug(rm_markdown(message))
-        if self.level <= logging.DEBUG and not self.log_enabled:
-            console.print(f"[steel_blue]{message}[/steel_blue]")
+    @property
+    def level(self):
+        return self.logger.level
 
-    def info(self, message: str):
-        _logger.info(rm_markdown(message))
-        if self.level <= logging.INFO and not self.log_enabled:
-            console.print(message)
+    @level.setter
+    def level(self, value):
+        self.logger.setLevel(value)
 
-    def warning(self, message: str):
-        _logger.warning(rm_markdown(message))
-        if self.level <= logging.WARNING and not self.log_enabled:
-            console.print(f"[yellow]{message}[/yellow]")
+    @property
+    def disabled(self) -> bool:
+        return self.logger.disabled
 
-    def error(self, message: str):
-        _logger.error(rm_markdown(message))
-        if self.level <= logging.ERROR and not self.log_enabled:
-            console.print(f"[red]{message}[/red]")
+    @disabled.setter
+    def disabled(self, value: bool):
+        self.logger.disabled = value
+
+    def can_print(self, level: int) -> bool:
+        return self.level <= level and self.disabled
+
+    def _log(
+        self,
+        level: int,
+        msg: str,
+        *args,
+        **kwargs,
+    ):
+        if not self.disabled:
+            msg = rm_markdown(msg)
+        self.logger.log(level, msg, *args, **kwargs)
+
+    def debug(self, msg: str, *args, **kwargs):
+        self._log(logging.DEBUG, msg, *args, **kwargs)
+        if self.can_print(logging.DEBUG):
+            self.console.print(f"[steel_blue]{msg}[/steel_blue]")
+
+    def info(self, msg: str, *args, **kwargs):
+        self._log(logging.INFO, msg, *args, **kwargs)
+        if self.can_print(logging.INFO):
+            self.console.print(msg)
+
+    def warning(self, msg: str, *args, **kwargs):
+        self._log(logging.WARNING, msg, *args, **kwargs)
+        if self.can_print(logging.WARNING):
+            self.console.print(f"[yellow]{msg}[/yellow]")
+
+    def error(self, msg: str, *args, **kwargs):
+        self._log(logging.ERROR, msg, *args, **kwargs)
+        if self.can_print(logging.ERROR):
+            self.console.print(f"[red]{msg}[/red]")
 
 
-logger = Logger()
+logger = RichLogger(logger=_logger)
+
+_MARKDOWN_PATTERN = re.compile(r"\[\/?\w+(?:=[^\]]*)?\]")
+
+
+def rm_markdown(text: str) -> str:
+    """
+    Removes rich-style or markdown-like tags from the input string.
+    It removes tags such as [bold], [italic], [color], etc.
+    """
+    return _MARKDOWN_PATTERN.sub("", text)
+
 
 TAG_START = "[bold][cyan]"
 TAG_END = "[/cyan][/bold]"
@@ -68,12 +111,5 @@ COMMIT_END = "[/blue][/bold]"
 DRY_RUN_START = "[grey58]"
 DRY_RUN_END = "[/grey58]"
 
-_MARKDOWN_PATTERN = re.compile(r"\[\/?\w+(?:=[^\]]*)?\]")
-
-
-def rm_markdown(text: str) -> str:
-    """
-    Removes rich-style or markdown-like tags from the input string.
-    It removes tags such as [bold], [italic], [color], etc.
-    """
-    return _MARKDOWN_PATTERN.sub("", text)
+RELEASE_TAG_START = "[bold][green]"
+RELEASE_TAG_END = "[/green][/bold]"

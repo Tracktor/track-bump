@@ -1,6 +1,7 @@
+import logging
 import os
 from pathlib import Path
-import logging
+
 import pytest
 
 DEFAULT_BRANCH = "master"
@@ -13,7 +14,7 @@ STATIC_DIR = Path(__file__).parent / "static"
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_logging():
-    from track_bump.logs import init_logging, console
+    from track_bump.logs import init_logging, logger
 
     init_logging(logging.WARNING)
-    console.quiet = True
+    logger.console.quiet = True

@@ -1,8 +1,9 @@
-from .utils import get_last_tag, parse_version, get_last_commit_message
-from .logs import logger, COMMIT_START, COMMIT_END
-from .env import DEFAULT_BRANCH
-from typing import Literal
 import re
+from typing import Literal
+
+from .env import DEFAULT_BRANCH
+from .logs import COMMIT_END, COMMIT_START, TAG_END, TAG_START, logger
+from .utils import get_last_commit_message, get_last_tag, parse_version
 
 __all__ = (
     "get_latest_default_tag",
@@ -52,7 +53,7 @@ def get_new_tag(latest_tag: str | None, release_tag: ReleaseTag, last_commit_mes
     _next_release = f"v{major}.{minor + 1}.0"
     if release_tag != "stable":
         _latest_release_tag = get_latest_release_tag(release_tag)
-        logger.info(f"Latest {release_tag} tag: {_latest_release_tag}")
+        logger.info(f"Latest {release_tag} tag: {TAG_START}{_latest_release_tag}{TAG_END}")
         _release_number = int(_latest_release_tag.split(".")[-1]) + 1 if _latest_release_tag is not None else 0
         _tag = f"{_next_release}-{release_tag}.{_release_number}"
     else:

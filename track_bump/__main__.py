@@ -2,11 +2,13 @@ import logging
 from pathlib import Path
 
 from piou import Cli, Option
-from .logs import init_logging as _init_logging, logger
+
 from .bump import bump_project
 from .env import DEFAULT_BRANCH
-from .tags import get_latest_default_tag, get_branch_release_tag, get_latest_release_tag
-from .utils import set_cd, get_current_branch
+from .logs import init_logging as _init_logging
+from .logs import logger
+from .tags import get_branch_release_tag, get_latest_default_tag, get_latest_release_tag
+from .utils import get_current_branch, set_cd
 
 cli = Cli("Track-bump utility commands")
 
@@ -17,7 +19,7 @@ cli.add_option("--init-logging", help="Initialize logging")
 
 def on_process(verbose: bool = False, verbose2: bool = False, init_logging: bool = False):
     logger.level = logging.DEBUG if verbose2 else logging.INFO if verbose else logging.WARNING
-    logger.log_enabled = init_logging
+    logger.disabled = init_logging
     if init_logging:
         _init_logging(logger.level)
 

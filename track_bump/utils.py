@@ -1,9 +1,11 @@
+import contextlib
 import os
 import pathlib
 import re
 import subprocess
+
 from track_bump.env import CI_USER, CI_USER_EMAIL
-import contextlib
+
 from .logs import logger
 
 __all__ = (
@@ -21,16 +23,23 @@ __all__ = (
 )
 
 
-def exec_cmd(cmd: str | list[str], *, encoding: str = "utf-8", env: dict | None = None) -> str:
+def exec_cmd(cmd: str | list[str], *, env: dict | None = None, show_progress: bool = False) -> str:
     default_shell = os.getenv("SHELL", "/bin/bash")
+    logger.debug(f"Executing command {cmd!r}")
+    process = subprocess.Popen(
+        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable=default_shell, env=env, text=True
+    )
+    if show_progress:
+        for line in process.stderr or []:
+            logger.debug(f" {line.rstrip()}")
 
-    logger.debug(f"Executing command: {cmd}")
-    stdout, stderr = subprocess.Popen(
-        cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, executable=default_shell, env=env
-    ).communicate()
-    if stderr:
-        raise Exception(stderr.decode(encoding))
-    return stdout.decode(encoding)
+    stdout, stderr = process.communicate()
+    exit_code = process.wait()
+    if exit_code != 0:
+        raise Exception(stderr)
+    if stdout:
+        logger.debug(f"Command output: {stdout!r}")
+    return stdout
 
 
 @contextlib.contextmanager

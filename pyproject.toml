@@ -1,30 +1,30 @@
-[tool.poetry]
+[project]
 name = "track-bump"
 version = "0.5.1"
-description = ""
-authors = ["Julien Brayere <julien.brayere@tracktor.fr>"]
+description = "Utility library for bumping version numbers in project files"
 readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "piou>=0.14.2",
+]
 
-[tool.poetry.dependencies]
-python = "^3.12"
-piou = "^0.14.2"
-
-[tool.poetry.group.dev.dependencies]
-pytest-cov = "^5.0.0"
-pytest = "^8.2.2"
-pyright = "^1.1.372"
-ruff = "^0.5.3"
+[dependency-groups]
+dev = [
+    "pyright>=1.1.391",
+    "pytest>=8.3.4",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.9.1",
+]
+bump = [
+    "commitizen>=4.1.0",
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.pytest.ini_options]
-addopts = "--cov=track_bump -s -q -x --no-cov-on-fail"
-testpaths = [
-    "tests"
-]
-python_files = "*.py"
+[project.scripts]
+cli = 'track_bump.__main__:run'
 
 
 [tool.pyright]
@@ -34,21 +34,28 @@ exclude = []
 pythonVersion = "3.12"
 pythonPlatform = "Linux"
 
-[tool.commitizen]
-name = "cz_conventional_commits"
-version = "0.5.1"
-tag_format = "$version"
-version_files = [
-    "pyproject.toml:version"
+[tool.pytest.ini_options]
+addopts = "--cov=track_bump -s -q -x --no-cov-on-fail"
+testpaths = [
+    "tests"
 ]
-bump_message = "release $current_version → $new_version [skip ci]"
-
+python_files = "*.py"
 
 [tool.ruff]
 line-length = 120
 target-version = "py312"
-# Waiting for fix: https://github.com/charliermarsh/ruff/issues/282
-#ignore = ["E999"]
+
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+
+
+[tool.ruff.lint]
+select = [
+    "I",  # isort formatting.
+]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = [
@@ -56,18 +63,14 @@ target-version = "py312"
     "F401",
     # unable to detect undefined names
     "F403",
-    #
-    "F405"
 ]
 
-[tool.ruff.lint.flake8-quotes]
-docstring-quotes = "double"
-inline-quotes = "single"
 
-[tool.ruff.lint.flake8-tidy-imports]
-# Disallow all relative imports.
-ban-relative-imports = "all"
-
-
-[tool.poetry.scripts]
-cli = 'track_bump.__main__:run'
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.5.1"
+tag_format = "$version"
+version_files = [
+    "pyproject.toml:version"
+]
+bump_message = "chore(release): release $current_version → $new_version [skip ci]"
