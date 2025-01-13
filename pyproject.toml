@@ -1,7 +1,8 @@
 [project]
 name = "track-bump"
-version = "0.5.1"
+version = "0.6.0"
 description = "Utility library for bumping version numbers in project files"
+authors = [{ name = "Julien Brayere", email = "julien.brayere@tracktor.com" }]
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -68,7 +69,7 @@ select = [
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "0.5.1"
+version = "0.6.0"
 tag_format = "$version"
 version_files = [
     "pyproject.toml:version"
