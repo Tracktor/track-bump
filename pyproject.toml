@@ -26,6 +26,7 @@ build-backend = "hatchling.build"
 
 [project.scripts]
 cli = 'track_bump.__main__:run'
+track-bump = 'track_bump.__main__:run'
 
 
 [tool.pyright]
