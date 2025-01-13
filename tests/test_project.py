@@ -1,10 +1,10 @@
-from pathlib import Path
+import shutil
 import tomllib
+from pathlib import Path
 
 import pytest
-import shutil
 
-from .conftest import STATIC_DIR, DEFAULT_BRANCH
+from .conftest import DEFAULT_BRANCH, STATIC_DIR
 
 
 @pytest.fixture(scope="function")
@@ -15,7 +15,7 @@ def project_path(tmp_path: Path):
 @pytest.fixture(scope="function")
 def setup_project(project_path: Path):
     shutil.copytree(STATIC_DIR / "project", project_path)
-    from track_bump.utils import git_setup, set_cd, exec_cmd
+    from track_bump.utils import exec_cmd, git_setup, set_cd
 
     exec_cmd(f'git config --global init.defaultBranch "{DEFAULT_BRANCH}"')
     with set_cd(project_path):
@@ -24,7 +24,7 @@ def setup_project(project_path: Path):
 
 
 def get_tags(project_path: Path):
-    from track_bump.utils import set_cd, get_tags
+    from track_bump.utils import get_tags, set_cd
 
     with set_cd(project_path):
         tags = get_tags()

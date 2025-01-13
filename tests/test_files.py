@@ -1,8 +1,8 @@
 import textwrap
 import tomllib
+from contextlib import nullcontext
 
 import pytest
-from contextlib import nullcontext
 
 
 @pytest.mark.parametrize(

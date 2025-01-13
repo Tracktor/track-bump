@@ -1,5 +1,7 @@
-import pytest
 from contextlib import nullcontext
+
+import pytest
+
 from .conftest import DEFAULT_BRANCH
 
 

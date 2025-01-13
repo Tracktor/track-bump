@@ -1,6 +1,6 @@
-from pathlib import Path
-import tomllib
 import re
+import tomllib
+from pathlib import Path
 from typing import TypedDict
 
 from .logs import logger
