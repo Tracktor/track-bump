@@ -75,7 +75,7 @@ jobs:
             - trackbump-{{ checksum "pyproject.toml" }}
       - run:
           name: Publishing
-          command: uv publish -u $PYPI_USER -p $PYPI_PASSWORD
+          command: uv publish -u __token__ -p $PYPI_TOKEN
 
 
 workflows:
