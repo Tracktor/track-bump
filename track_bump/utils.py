@@ -24,7 +24,9 @@ __all__ = (
 )
 
 
-def exec_cmd(cmd: str | list[str], *, env: dict | None = None, show_progress: bool = False) -> str:
+def exec_cmd(
+    cmd: str | list[str], *, env: dict | None = None, show_progress: bool = False, ignore_errors: bool = False
+) -> str:
     default_shell = os.getenv("SHELL", "/bin/bash")
     logger.debug(f"Executing command {cmd!r}")
     process = subprocess.Popen(
@@ -36,7 +38,7 @@ def exec_cmd(cmd: str | list[str], *, env: dict | None = None, show_progress: bo
 
     stdout, stderr = process.communicate()
     exit_code = process.wait()
-    if exit_code != 0:
+    if not ignore_errors and exit_code != 0:
         raise Exception(stderr)
 
     if stdout:
@@ -79,9 +81,9 @@ def git_tag(version: str):
 @contextlib.contextmanager
 def git_setup(sign_commits: bool = False, default_branch: str | None = None):
     _cached = {
-        "user.email": get_git_email(),
-        "user.name": get_git_user_name(),
-        "init.defaultBranch": get_default_branch(),
+        "user.email": get_git_email(ignore_errors=True),
+        "user.name": get_git_user_name(ignore_errors=True),
+        "init.defaultBranch": get_default_branch(ignore_errors=True),
     }
 
     _ci_user = CI_USER or get_git_user_name()
@@ -141,17 +143,17 @@ def parse_version(version: str) -> tuple[MajorMinorPatch, ReleaseVersion | None]
     return (major, minor, patch), release
 
 
-def get_git_email():
-    return exec_cmd("git config user.email").strip()
+def get_git_email(ignore_errors: bool = False):
+    return exec_cmd("git config user.email", ignore_errors=ignore_errors).strip()
 
 
-def get_git_user_name():
-    return exec_cmd("git config user.name").strip()
+def get_git_user_name(ignore_errors: bool = False):
+    return exec_cmd("git config user.name", ignore_errors=ignore_errors).strip()
 
 
-def get_gpg_sign():
-    return exec_cmd("git config commit.gpgSign").strip()
+def get_gpg_sign(ignore_errors: bool = False):
+    return exec_cmd("git config commit.gpgSign", ignore_errors=ignore_errors).strip()
 
 
-def get_default_branch():
-    return exec_cmd("git config init.defaultBranch").strip()
+def get_default_branch(ignore_errors: bool = False):
+    return exec_cmd("git config init.defaultBranch", ignore_errors=ignore_errors).strip()
