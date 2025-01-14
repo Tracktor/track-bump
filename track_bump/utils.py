@@ -103,7 +103,10 @@ def git_setup(sign_commits: bool = False, default_branch: str | None = None):
     yield
 
     for key, value in _cached.items():
-        exec_cmd(f"git config {key} {value}")
+        if value:
+            exec_cmd(f'git config {key} "{value}"')
+        else:
+            exec_cmd(f"git config --unset {key}")
 
 
 def get_current_branch() -> str:
