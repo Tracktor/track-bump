@@ -82,12 +82,12 @@ def git_setup(sign_commits: bool = False):
         "commit.gpgSign": get_gpg_sign(),
     }
 
-    _ci_user = CI_USER
-    if _ci_user := get_git_user_name() is None:
+    _ci_user = CI_USER or get_git_user_name()
+    if not _ci_user:
         raise ValueError("CI_USER must be set")
 
-    _ci_email = CI_USER_EMAIL
-    if _ci_email := get_git_email() is None:
+    _ci_email = CI_USER_EMAIL or get_git_email()
+    if not _ci_email:
         raise ValueError("CI_USER_EMAIL must be set")
 
     exec_cmd(f'git config user.email "{CI_USER_EMAIL}"')
