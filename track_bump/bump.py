@@ -1,18 +1,23 @@
 from pathlib import Path
 
-from track_bump.tags import get_branch_release_tag, get_latest_stable_tag, get_new_tag
+from track_bump.tags import get_branch_release, get_latest_release_tag, get_latest_stable_tag, get_new_tag
 from track_bump.update_files import parse_config_file, replace_in_files
-from track_bump.utils import fetch_tags, get_current_branch, git_commit, git_setup, git_tag, parse_version, set_cd
+from track_bump.utils import (
+    fetch_tags,
+    get_current_branch,
+    get_last_commit_message,
+    git_commit,
+    git_setup,
+    git_tag,
+    parse_version,
+    set_cd,
+)
 
 from .logs import (
-    BRANCH_END,
-    BRANCH_START,
     COMMIT_END,
     COMMIT_START,
     DRY_RUN_END,
     DRY_RUN_START,
-    RELEASE_TAG_END,
-    RELEASE_TAG_START,
     TAG_END,
     TAG_START,
     logger,
@@ -49,22 +54,29 @@ def bump_project(
         # Get the latest stable and release tags for the branch
         fetch_tags(force=force)
         _latest_stable_tag = get_latest_stable_tag()
-        logger.info(f"Latest tag: {TAG_START}{_latest_stable_tag}{TAG_END}")
         _branch = branch or get_current_branch()
-        _release_tag = get_branch_release_tag(_branch)
-        logger.info(
-            f"Branch {BRANCH_START}{_branch}{BRANCH_END} (tag: {RELEASE_TAG_START}{_release_tag}{RELEASE_TAG_END})"
-        )
+        _release = get_branch_release(_branch)
         # If no latest tag, use the current version
         if _latest_stable_tag is None:
             (major, minor, path), release = parse_version(current_version)
             _latest_stable_tag = f"v{major}.{max(minor - 1, 1)}.{path}"
+
+        _latest_release_tag = get_latest_release_tag(_release)
         _new_tag = get_new_tag(
-            stable_tag=_latest_stable_tag, release_tag=_release_tag, last_commit_message=last_commit_message
+            stable_tag=_latest_stable_tag,
+            release_tag=_latest_release_tag,
+            last_commit_message=last_commit_message or get_last_commit_message(),
+            release=_release,
         )
 
     new_version = _new_tag.removeprefix("v")
-    logger.info(f"New tag {TAG_START}{_new_tag}{TAG_END} (version: {new_version})")
+    logger.info(
+        f"Stable tag: {TAG_START}{_latest_stable_tag}{TAG_END} | "
+        f"Latest release tag: {TAG_START}{_latest_release_tag}{TAG_END} | "
+        f"New version: {new_version} "
+        f"(branch: {_branch}, release: {_release})"
+    )
+
     version_files = config["version_files"] + [f"{config_path.name}:version"]
     if dry_run:
         logger.info(
@@ -78,7 +90,6 @@ def bump_project(
             f"{DRY_RUN_START}Would commit with message: {COMMIT_START}{_bump_message}{COMMIT_END} "
             f"and tag: {TAG_START}{_new_tag}{TAG_END}{DRY_RUN_END}"
         )
-
     else:
         logger.info(f"Committing with message: {COMMIT_START}{_bump_message}{COMMIT_END}")
         with set_cd(project_path):

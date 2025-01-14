@@ -74,16 +74,31 @@ def git_tag(version: str):
         logger.debug(f"tag output: {_output}")
 
 
+@contextlib.contextmanager
 def git_setup(sign_commits: bool = False):
-    if CI_USER is None:
+    _cached = {
+        "user.email": get_git_email(),
+        "user.name": get_git_user_name(),
+        "commit.gpgSign": get_gpg_sign(),
+    }
+
+    _ci_user = CI_USER
+    if _ci_user := get_git_user_name() is None:
         raise ValueError("CI_USER must be set")
-    if CI_USER_EMAIL is None:
+
+    _ci_email = CI_USER_EMAIL
+    if _ci_email := get_git_email() is None:
         raise ValueError("CI_USER_EMAIL must be set")
 
     exec_cmd(f'git config user.email "{CI_USER_EMAIL}"')
     exec_cmd(f'git config user.name "{CI_USER}"')
     if sign_commits:
         exec_cmd("git config commit.gpgSign true")
+
+    yield
+
+    for key, value in _cached.items():
+        exec_cmd(f"git config {key} {value}")
 
 
 def get_current_branch() -> str:
@@ -121,3 +136,15 @@ def parse_version(version: str) -> tuple[MajorMinorPatch, ReleaseVersion | None]
     else:
         release = None
     return (major, minor, patch), release
+
+
+def get_git_email():
+    return exec_cmd("git config user.email").strip()
+
+
+def get_git_user_name():
+    return exec_cmd("git config user.name").strip()
+
+
+def get_gpg_sign():
+    return exec_cmd("git config commit.gpgSign").strip()

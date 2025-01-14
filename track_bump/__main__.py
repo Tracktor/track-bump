@@ -7,7 +7,7 @@ from .bump import bump_project
 from .env import DEFAULT_BRANCH
 from .logs import init_logging as _init_logging
 from .logs import logger
-from .tags import get_branch_release_tag, get_latest_release_tag, get_latest_stable_tag
+from .tags import get_branch_release, get_latest_release_tag, get_latest_stable_tag
 from .utils import get_current_branch, set_cd
 
 cli = Cli("Track-bump utility commands")
@@ -67,7 +67,7 @@ def get_latest_tag(
         tag = (
             get_latest_stable_tag()
             if _branch == DEFAULT_BRANCH
-            else get_latest_release_tag(get_branch_release_tag(_branch))
+            else get_latest_release_tag(get_branch_release(_branch))
         )
     if tag:
         print(tag)

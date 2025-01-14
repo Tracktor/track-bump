@@ -39,7 +39,7 @@ def get_versions(project_path: Path):
 
 
 def test_bump(setup_project, project_path, monkeypatch):
-    monkeypatch.setattr("track_bump.tags.get_last_commit_message", lambda: None)
+    monkeypatch.setattr("track_bump.utils.get_last_commit_message", lambda: None)
     from track_bump.bump import bump_project
 
     assert get_versions(project_path) == {
