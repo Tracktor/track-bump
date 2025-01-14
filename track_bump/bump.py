@@ -47,9 +47,9 @@ def bump_project(
     config = parse_config_file(config_path)
 
     # Setup git
-    with git_setup(sign_commits=sign_commits):
-        current_version = config["version"]
-        with set_cd(project_path):
+    current_version = config["version"]
+    with set_cd(project_path):
+        with git_setup(sign_commits=sign_commits):
             # Get the latest stable and release tags for the branch
             fetch_tags(force=force)
             _latest_stable_tag = get_latest_stable_tag()

@@ -17,7 +17,6 @@ def setup_project(project_path: Path):
     shutil.copytree(STATIC_DIR / "project", project_path)
     from track_bump.utils import exec_cmd, git_setup, set_cd
 
-    exec_cmd(f'git config --global init.defaultBranch "{DEFAULT_BRANCH}"')
     with set_cd(project_path):
         exec_cmd("git init")
         with git_setup(sign_commits=False, default_branch=DEFAULT_BRANCH):
