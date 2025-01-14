@@ -1,6 +1,5 @@
 import logging
 import os
-from importlib import reload
 from pathlib import Path
 
 import pytest
