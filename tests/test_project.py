@@ -20,7 +20,8 @@ def setup_project(project_path: Path):
     exec_cmd(f'git config --global init.defaultBranch "{DEFAULT_BRANCH}"')
     with set_cd(project_path):
         exec_cmd("git init")
-        git_setup(sign_commits=False)
+        with git_setup(sign_commits=False, default_branch=DEFAULT_BRANCH):
+            yield
 
 
 def get_tags(project_path: Path):

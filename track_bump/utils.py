@@ -20,6 +20,7 @@ __all__ = (
     "get_tags",
     "get_last_commit_message",
     "fetch_tags",
+    "get_default_branch",
 )
 
 
@@ -37,6 +38,7 @@ def exec_cmd(cmd: str | list[str], *, env: dict | None = None, show_progress: bo
     exit_code = process.wait()
     if exit_code != 0:
         raise Exception(stderr)
+
     if stdout:
         logger.debug(f"Command output: {stdout!r}")
     return stdout
@@ -75,11 +77,11 @@ def git_tag(version: str):
 
 
 @contextlib.contextmanager
-def git_setup(sign_commits: bool = False):
+def git_setup(sign_commits: bool = False, default_branch: str | None = None):
     _cached = {
         "user.email": get_git_email(),
         "user.name": get_git_user_name(),
-        "commit.gpgSign": get_gpg_sign(),
+        "init.defaultBranch": get_default_branch(),
     }
 
     _ci_user = CI_USER or get_git_user_name()
@@ -94,7 +96,8 @@ def git_setup(sign_commits: bool = False):
     exec_cmd(f'git config user.name "{CI_USER}"')
     if sign_commits:
         exec_cmd("git config commit.gpgSign true")
-
+    if default_branch:
+        exec_cmd(f'git config init.defaultBranch "{default_branch}"')
     yield
 
     for key, value in _cached.items():
@@ -148,3 +151,7 @@ def get_git_user_name():
 
 def get_gpg_sign():
     return exec_cmd("git config commit.gpgSign").strip()
+
+
+def get_default_branch():
+    return exec_cmd("git config init.defaultBranch").strip()
