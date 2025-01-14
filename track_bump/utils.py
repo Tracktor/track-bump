@@ -20,10 +20,13 @@ __all__ = (
     "get_tags",
     "get_last_commit_message",
     "fetch_tags",
+    "get_default_branch",
 )
 
 
-def exec_cmd(cmd: str | list[str], *, env: dict | None = None, show_progress: bool = False) -> str:
+def exec_cmd(
+    cmd: str | list[str], *, env: dict | None = None, show_progress: bool = False, ignore_errors: bool = False
+) -> str:
     default_shell = os.getenv("SHELL", "/bin/bash")
     logger.debug(f"Executing command {cmd!r}")
     process = subprocess.Popen(
@@ -35,8 +38,9 @@ def exec_cmd(cmd: str | list[str], *, env: dict | None = None, show_progress: bo
 
     stdout, stderr = process.communicate()
     exit_code = process.wait()
-    if exit_code != 0:
+    if not ignore_errors and exit_code != 0:
         raise Exception(stderr)
+
     if stdout:
         logger.debug(f"Command output: {stdout!r}")
     return stdout
@@ -74,16 +78,35 @@ def git_tag(version: str):
         logger.debug(f"tag output: {_output}")
 
 
-def git_setup(sign_commits: bool = False):
-    if CI_USER is None:
+@contextlib.contextmanager
+def git_setup(sign_commits: bool = False, default_branch: str | None = None):
+    _cached = {
+        "user.email": get_git_email(ignore_errors=True),
+        "user.name": get_git_user_name(ignore_errors=True),
+        "init.defaultBranch": get_default_branch(ignore_errors=True),
+    }
+
+    _ci_user = CI_USER or get_git_user_name()
+    if not _ci_user:
         raise ValueError("CI_USER must be set")
-    if CI_USER_EMAIL is None:
+
+    _ci_email = CI_USER_EMAIL or get_git_email()
+    if not _ci_email:
         raise ValueError("CI_USER_EMAIL must be set")
 
     exec_cmd(f'git config user.email "{CI_USER_EMAIL}"')
     exec_cmd(f'git config user.name "{CI_USER}"')
     if sign_commits:
         exec_cmd("git config commit.gpgSign true")
+    if default_branch:
+        exec_cmd(f'git config init.defaultBranch "{default_branch}"')
+    yield
+
+    for key, value in _cached.items():
+        if value:
+            exec_cmd(f'git config {key} "{value}"')
+        else:
+            exec_cmd(f"git config --unset {key}")
 
 
 def get_current_branch() -> str:
@@ -105,7 +128,14 @@ type ReleaseVersion = tuple[str, int]
 
 
 def parse_version(version: str) -> tuple[MajorMinorPatch, ReleaseVersion | None]:
-    _version, *_release = version.split("-")
+    """
+    Parse the version string and return a tuple with the major, minor, patch and the release version if any
+    For example:
+    - v0.1.0-beta.1 -> ((0, 1, 0), ('beta', 1))
+    - v0.1.0 -> ((0, 1, 0), None)
+    """
+
+    _version, *_release = version.removeprefix("v").split("-")
     major, minor, patch = [int(x) for x in _version.split(".")]
 
     if _release:
@@ -114,3 +144,19 @@ def parse_version(version: str) -> tuple[MajorMinorPatch, ReleaseVersion | None]
     else:
         release = None
     return (major, minor, patch), release
+
+
+def get_git_email(ignore_errors: bool = False):
+    return exec_cmd("git config user.email", ignore_errors=ignore_errors).strip()
+
+
+def get_git_user_name(ignore_errors: bool = False):
+    return exec_cmd("git config user.name", ignore_errors=ignore_errors).strip()
+
+
+def get_gpg_sign(ignore_errors: bool = False):
+    return exec_cmd("git config commit.gpgSign", ignore_errors=ignore_errors).strip()
+
+
+def get_default_branch(ignore_errors: bool = False):
+    return exec_cmd("git config init.defaultBranch", ignore_errors=ignore_errors).strip()

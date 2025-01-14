@@ -41,7 +41,9 @@ def parse_config_file(config_path: Path) -> ParseConfig:
 
 
 def replace_in_files(config_path: Path, files: list[str], version: str):
-    replace_in_file(config_path, version=version, tag="version")
+    """
+    Replace the version in the given files
+    """
     for _file in files:
         try:
             _path, _tag = _file.split(":")
