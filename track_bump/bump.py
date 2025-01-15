@@ -68,30 +68,30 @@ def bump_project(
                 release=_release,
             )
 
-        new_version = _new_tag.removeprefix("v")
-        logger.info(
-            f"Stable tag: {TAG_START}{_latest_stable_tag}{TAG_END} | "
-            f"Latest release tag: {TAG_START}{_latest_release_tag}{TAG_END} | "
-            f"New version: {new_version} "
-            f"(branch: {_branch}, release: {_release})"
-        )
+            new_version = _new_tag.removeprefix("v")
+            logger.info(
+                f"Stable tag: {TAG_START}{_latest_stable_tag}{TAG_END} | "
+                f"Latest release tag: {TAG_START}{_latest_release_tag}{TAG_END} | "
+                f"New version: {new_version} "
+                f"(branch: {_branch}, release: {_release})"
+            )
 
-        version_files = config["version_files"] + [f"{config_path.name}:version"]
-        if dry_run:
-            logger.info(
-                f"{DRY_RUN_START}Would replace version with {new_version} in files:\n - {'\n - '.join(version_files)}"
-            )
-        else:
-            replace_in_files(config_path, version_files, new_version)
-        _bump_message = config["bump_message"].format(current_version=current_version, new_version=new_version)
-        if dry_run:
-            logger.info(
-                f"{DRY_RUN_START}Would commit with message: {COMMIT_START}{_bump_message}{COMMIT_END} "
-                f"and tag: {TAG_START}{_new_tag}{TAG_END}{DRY_RUN_END}"
-            )
-        else:
-            logger.info(f"Committing with message: {COMMIT_START}{_bump_message}{COMMIT_END}")
-            with set_cd(project_path):
-                git_commit(_bump_message)
-                git_tag(_new_tag)
-        logger.info("Done")
+            version_files = config["version_files"] + [f"{config_path.name}:version"]
+            if dry_run:
+                logger.info(
+                    f"{DRY_RUN_START}Would replace version with {new_version} in files:\n - {'\n - '.join(version_files)}"
+                )
+            else:
+                replace_in_files(config_path, version_files, new_version)
+            _bump_message = config["bump_message"].format(current_version=current_version, new_version=new_version)
+            if dry_run:
+                logger.info(
+                    f"{DRY_RUN_START}Would commit with message: {COMMIT_START}{_bump_message}{COMMIT_END} "
+                    f"and tag: {TAG_START}{_new_tag}{TAG_END}{DRY_RUN_END}"
+                )
+            else:
+                logger.info(f"Committing with message: {COMMIT_START}{_bump_message}{COMMIT_END}")
+                with set_cd(project_path):
+                    git_commit(_bump_message)
+                    git_tag(_new_tag)
+            logger.info("Done")
