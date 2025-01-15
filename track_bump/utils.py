@@ -39,7 +39,7 @@ def exec_cmd(
     stdout, stderr = process.communicate()
     exit_code = process.wait()
     if not ignore_errors and exit_code != 0:
-        raise Exception(stderr)
+        raise OSError(stderr)
 
     if stdout:
         logger.debug(f"Command output: {stdout!r}")
@@ -106,7 +106,10 @@ def git_setup(sign_commits: bool = False, default_branch: str | None = None):
         if value:
             exec_cmd(f'git config {key} "{value}"')
         else:
-            exec_cmd(f"git config --unset {key}")
+            try:
+                exec_cmd(f"git config --unset {key}")
+            except OSError as e:
+                logger.warning(f"Failed to run 'git config --unset {key}' ({e.args})")
 
 
 def get_current_branch() -> str:
