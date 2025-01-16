@@ -79,7 +79,7 @@ def git_tag(version: str):
 
 
 @contextlib.contextmanager
-def git_setup(sign_commits: bool = False, default_branch: str | None = None):
+def git_setup(sign_commits: bool = False, default_branch: str | None = None, no_reset: bool = False):
     _cached = {
         "user.email": get_git_email(ignore_errors=True),
         "user.name": get_git_user_name(ignore_errors=True),
@@ -101,6 +101,8 @@ def git_setup(sign_commits: bool = False, default_branch: str | None = None):
     if default_branch:
         exec_cmd(f'git config init.defaultBranch "{default_branch}"')
     yield
+    if no_reset:
+        return
 
     for key, value in _cached.items():
         if value:
@@ -118,7 +120,7 @@ def get_current_branch() -> str:
 
 def git_commit(message: str):
     exec_cmd("git add .")
-    exec_cmd(f'git commit -am "{message}"')
+    exec_cmd(f'git commit -m "{message}"')
 
 
 def get_last_commit_message() -> str | None:

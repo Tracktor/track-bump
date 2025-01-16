@@ -33,7 +33,12 @@ def bump_project(
     last_commit_message: str | None = None,
     dry_run: bool = False,
     force: bool = False,
+    no_reset_git: bool = False,
 ):
+    """
+    Bump the version of the project, create a commit and tag and commit the changes.
+    You can also add files to be added to the commit.
+    """
     logger.info(f"Bumping project in {project_path} (dry-run: {dry_run})")
     # Check if any of the config files exist
     for file in CONFIG_FILES:
@@ -49,7 +54,7 @@ def bump_project(
     # Setup git
     current_version = config["version"]
     with set_cd(project_path):
-        with git_setup(sign_commits=sign_commits):
+        with git_setup(sign_commits=sign_commits, no_reset=no_reset_git):
             # Get the latest stable and release tags for the branch
             fetch_tags(force=force)
             _latest_stable_tag = get_latest_stable_tag()
