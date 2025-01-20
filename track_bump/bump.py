@@ -34,10 +34,13 @@ def bump_project(
     dry_run: bool = False,
     force: bool = False,
     no_reset_git: bool = False,
+    add_tag: bool = True,
 ):
     """
     Bump the version of the project, create a commit and tag and commit the changes.
     You can also add files to be added to the commit.
+    If add_tag is specified, it will also create a tag with the new version. Otherwise
+    it'll just print the new tag.
     """
     logger.info(f"Bumping project in {project_path} (dry-run: {dry_run})")
     # Check if any of the config files exist
@@ -82,21 +85,23 @@ def bump_project(
             )
 
             version_files = config["version_files"] + [f"{config_path.name}:version"]
-            if dry_run:
+            if not dry_run:
+                replace_in_files(config_path, version_files, new_version)
+            else:
                 logger.info(
                     f"{DRY_RUN_START}Would replace version with {new_version} in files:\n - {'\n - '.join(version_files)}"
                 )
-            else:
-                replace_in_files(config_path, version_files, new_version)
             _bump_message = config["bump_message"].format(current_version=current_version, new_version=new_version)
-            if dry_run:
+            if not dry_run:
+                logger.info(f"Committing with message: {COMMIT_START}{_bump_message}{COMMIT_END}")
+                git_commit(_bump_message)
+                if add_tag:
+                    git_tag(_new_tag)
+            else:
                 logger.info(
                     f"{DRY_RUN_START}Would commit with message: {COMMIT_START}{_bump_message}{COMMIT_END} "
                     f"and tag: {TAG_START}{_new_tag}{TAG_END}{DRY_RUN_END}"
                 )
-            else:
-                logger.info(f"Committing with message: {COMMIT_START}{_bump_message}{COMMIT_END}")
-                with set_cd(project_path):
-                    git_commit(_bump_message)
-                    git_tag(_new_tag)
             logger.info("Done")
+            if not add_tag:
+                print(_new_tag)

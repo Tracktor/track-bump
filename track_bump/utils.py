@@ -74,8 +74,6 @@ def get_last_tag(pattern: str) -> str | None:
 
 def git_tag(version: str):
     _output = exec_cmd(f"git tag {version}")
-    if _output:
-        logger.debug(f"tag output: {_output}")
 
 
 @contextlib.contextmanager

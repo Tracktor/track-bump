@@ -35,6 +35,7 @@ def bump(
     dry_run: bool = Option(False, "--dry-run", help="Dry run"),
     force: bool = Option(False, "--force", help="Force fetch tags"),
     no_reset_git: bool = Option(False, "--no-reset-git", help="Do not reset git config"),
+    no_tag: bool = Option(False, "--no-tag", help="Do not create a tag"),
 ):
     """
     Bump the version of the project:
@@ -49,7 +50,15 @@ def bump(
     - release: rc
     - $DEFAULT_BRANCH: stable
     """
-    bump_project(project_path, sign_commits, branch=branch, dry_run=dry_run, force=force, no_reset_git=no_reset_git)
+    bump_project(
+        project_path,
+        sign_commits,
+        branch=branch,
+        dry_run=dry_run,
+        force=force,
+        no_reset_git=no_reset_git,
+        add_tag=not no_tag,
+    )
 
 
 @cli.command(cmd="get-latest-tag", help="Get the latest tag")
