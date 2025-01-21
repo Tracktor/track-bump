@@ -1,7 +1,7 @@
 from pathlib import Path
 
+from track_bump.config import Config, replace_in_files
 from track_bump.tags import get_branch_release, get_latest_release_tag, get_latest_stable_tag, get_new_tag
-from track_bump.update_files import parse_config_file, replace_in_files
 from track_bump.utils import (
     fetch_tags,
     get_current_branch,
@@ -23,11 +23,9 @@ from .logs import (
     logger,
 )
 
-CONFIG_FILES = [".cz.toml", "pyproject.toml"]
-
 
 def bump_project(
-    project_path: Path,
+    config: Config,
     sign_commits: bool = False,
     branch: str | None = None,
     last_commit_message: str | None = None,
@@ -35,6 +33,7 @@ def bump_project(
     force: bool = False,
     no_reset_git: bool = False,
     add_tag: bool = True,
+    pre_release: str | None = None,
 ):
     """
     Bump the version of the project, create a commit and tag and commit the changes.
@@ -42,27 +41,15 @@ def bump_project(
     If add_tag is specified, it will also create a tag with the new version. Otherwise
     it'll just print the new tag.
     """
-    logger.info(f"Bumping project in {project_path} (dry-run: {dry_run})")
-    # Check if any of the config files exist
-    for file in CONFIG_FILES:
-        config_path = Path(project_path / file)
-        if config_path.exists():
-            logger.debug(f"Found config file: {config_path}")
-            break
-    else:
-        raise FileNotFoundError(f"Could not find any of the following files: {CONFIG_FILES} in {project_path}")
-
-    config = parse_config_file(config_path)
-
     # Setup git
-    current_version = config["version"]
-    with set_cd(project_path):
+    current_version = config.version
+    with set_cd(config.project_path):
         with git_setup(sign_commits=sign_commits, no_reset=no_reset_git):
             # Get the latest stable and release tags for the branch
             fetch_tags(force=force)
             _latest_stable_tag = get_latest_stable_tag()
             _branch = branch or get_current_branch()
-            _release = get_branch_release(_branch)
+            _release = pre_release or get_branch_release(_branch, releases=config.releases)
             # If no latest tag, use the current version
             if _latest_stable_tag is None:
                 (major, minor, path), release = parse_version(current_version)
@@ -84,14 +71,14 @@ def bump_project(
                 f"(branch: {_branch}, release: {_release})"
             )
 
-            version_files = config["version_files"] + [f"{config_path.name}:version"]
+            version_files = config.version_files + [f"{config.config_path.name}:version"]
             if not dry_run:
-                replace_in_files(config_path, version_files, new_version)
+                replace_in_files(config.config_path, version_files, new_version)
             else:
                 logger.info(
                     f"{DRY_RUN_START}Would replace version with {new_version} in files:\n - {'\n - '.join(version_files)}"
                 )
-            _bump_message = config["bump_message"].format(current_version=current_version, new_version=new_version)
+            _bump_message = config.bump_message.format(current_version=current_version, new_version=new_version)
             if not dry_run:
                 logger.info(f"Committing with message: {COMMIT_START}{_bump_message}{COMMIT_END}")
                 git_commit(_bump_message)

@@ -4,7 +4,7 @@ from pathlib import Path
 from piou import Cli, Option
 
 from .bump import bump_project
-from .env import DEFAULT_BRANCH
+from .config import Config
 from .logs import init_logging as _init_logging
 from .logs import logger
 from .tags import get_branch_release, get_latest_release_tag, get_latest_stable_tag
@@ -36,6 +36,7 @@ def bump(
     force: bool = Option(False, "--force", help="Force fetch tags"),
     no_reset_git: bool = Option(False, "--no-reset-git", help="Do not reset git config"),
     no_tag: bool = Option(False, "--no-tag", help="Do not create a tag"),
+    pre_release: str | None = Option(None, "--pre-release", help="Pre-release version"),
 ):
     """
     Bump the version of the project:
@@ -48,16 +49,17 @@ def bump(
     The branches are mapped to the release tags as follows:
     - develop: beta
     - release: rc
-    - $DEFAULT_BRANCH: stable
     """
+    config = Config.from_project(project_path)
     bump_project(
-        project_path,
+        config,
         sign_commits,
         branch=branch,
         dry_run=dry_run,
         force=force,
         no_reset_git=no_reset_git,
         add_tag=not no_tag,
+        pre_release=pre_release,
     )
 
 
@@ -65,20 +67,18 @@ def bump(
 def get_latest_tag(
     project_path: Path = Option(Path.cwd(), "-p", "--project", help="Project path"),
     branch: str | None = Option(None, "--branch", help="Branch to bump"),
+    pre_release: str | None = Option(None, "--pre-release", help="Pre-release version"),
 ):
     f"""
     Prints the latest tag for the given branch (default: current branch)
-    if the branch is the default branch ({DEFAULT_BRANCH}), it will return the latest stable tag
     otherwise, it will return the latest associated release tag
     """
+    config = Config.from_project(project_path)
     with set_cd(project_path):
         _branch = branch or get_current_branch()
         logger.info(f"Getting latest tag for branch {_branch}")
-        tag = (
-            get_latest_stable_tag()
-            if _branch == DEFAULT_BRANCH
-            else get_latest_release_tag(get_branch_release(_branch))
-        )
+        _release = pre_release or get_branch_release(_branch, releases=config.releases)
+        tag = get_latest_stable_tag() if _branch == config.default_branch else get_latest_release_tag(_release)
     if tag:
         print(tag)
 

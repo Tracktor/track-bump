@@ -2,6 +2,8 @@ from contextlib import nullcontext
 
 import pytest
 
+from track_bump.config import get_default_releases
+
 from .conftest import DEFAULT_BRANCH
 
 
@@ -18,7 +20,7 @@ def test_get_branch_release(branch, expected):
     from track_bump.tags import get_branch_release
 
     with expected as e:
-        assert get_branch_release(branch) == e
+        assert get_branch_release(branch, releases=get_default_releases()) == e
 
 
 @pytest.mark.parametrize(

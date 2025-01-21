@@ -1,8 +1,6 @@
 import re
-from typing import Literal
 
-from .env import DEFAULT_BRANCH
-from .logs import COMMIT_END, COMMIT_START, TAG_END, TAG_START, logger
+from .logs import COMMIT_END, COMMIT_START, logger
 from .utils import get_last_tag, parse_version
 
 __all__ = (
@@ -10,18 +8,7 @@ __all__ = (
     "get_latest_release_tag",
     "get_branch_release",
     "get_new_tag",
-    "Release",
-    "BranchName",
 )
-
-Release = Literal["beta", "rc", "stable"]
-type BranchName = str
-
-_RELEASES: dict[BranchName, Release] = {
-    r"^develop$": "beta",
-    r"^release/.*": "rc",
-    rf"^{DEFAULT_BRANCH}$": "stable",
-}
 
 
 def get_latest_stable_tag():
@@ -42,15 +29,17 @@ def get_latest_release_tag(release_tag: str) -> str | None:
     return get_last_tag(rf"^v\d+\.\d+\.\d+-{release_tag}\.\d+$")
 
 
-def get_branch_release(branch: BranchName) -> Release:
+def get_branch_release(branch: str, releases: dict[str, str]) -> str:
     """
     Get the release name for the given branch
     """
 
-    for branch_pattern, release_tag in _RELEASES.items():
+    for branch_pattern, release_tag in releases.items():
         if re.match(branch_pattern, branch):
             return release_tag
-    raise ValueError(f"Branch {branch!r} is not supported")
+
+    _supported_branches = ", ".join(releases.keys())
+    raise ValueError(f"Branch {branch!r} is not supported. Supported branches are: {_supported_branches}")
 
 
 _BUMP_MINOR_REG = re.compile(r"release:.*")
